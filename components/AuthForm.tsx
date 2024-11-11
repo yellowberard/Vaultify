@@ -18,6 +18,7 @@ import Link from "next/link";
 import { Simulate } from "react-dom/test-utils";
 import error = Simulate.error;
 import { createAccount } from "@/lib/actions/user.actions";
+import OTPModal from "@/components/OTPModal";
 const formSchema = z.object({
   username: z.string().min(2).max(50),
 });
@@ -48,23 +49,23 @@ const AuthForm = ({ type }: { type: FormType }) => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
     setIsLoading(true);
     try {
-      const user = createAccount({
+      const user = await createAccount({
         fullName: values.fullName || "",
         email: values.email,
       });
-      setAccountId(user.AccountId);
+      setAccountId(user.accountId);
     } catch {
       setErrorMessage("Failed to create account. Try Again !!!");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
   return (
     <>
       <Form {...form}>
@@ -150,6 +151,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
           </div>
         </form>
       </Form>
+      {accountId && (
+        <OTPModal email={form.getValues("email")} accountId={accountId} />
+      )}
     </>
   );
 };
