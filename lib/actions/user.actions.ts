@@ -66,6 +66,7 @@ export const createAccount = async ({
 
   return parseStringify({ accountId });
 };
+
 export const verifySecret = async ({
   accountId,
   password,
@@ -88,5 +89,31 @@ export const verifySecret = async ({
     return parseStringify({ sessionId: session.$id });
   } catch (error) {
     handleError(error, "Failed to verify OTP");
+  }
+};
+
+export const getCurrentUser = async () => {
+  const { databases, account } = await createSessionClient();
+  const result = await account.get();
+  const user = await databases.listDocuments(
+    appwriteConfig.databaseId,
+    appwriteConfig.usersCollectionId,
+    [Query.equal("accountId", result.$id)],
+  );
+  if (user.total <= 0) return null;
+  return parseStringify(user.documents[0]);
+};
+
+export const signOutUser = async () => {
+  const { account } = await createSessionClient();
+  try {
+    // Delete the current session
+    await account.deleteSession("current");
+    (await cookies()).delete("appwrite-session");
+    console.log("User logged out successfully.");
+  } catch (error) {
+    console.error("Error logging out:", error);
+  } finally {
+    redirect("/sign-in");
   }
 };
