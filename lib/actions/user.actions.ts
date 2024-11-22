@@ -106,14 +106,30 @@ export const getCurrentUser = async () => {
 
 export const signOutUser = async () => {
   const { account } = await createSessionClient();
+
   try {
-    // Delete the current session
     await account.deleteSession("current");
     (await cookies()).delete("appwrite-session");
-    console.log("User logged out successfully.");
   } catch (error) {
-    console.error("Error logging out:", error);
+    handleError(error, "Failed to sign out user");
   } finally {
     redirect("/sign-in");
+  }
+};
+
+
+export const signInUser = async ({ email }: { email: string }) => {
+  try {
+    const existingUser = await getUserByEmail(email);
+
+    // User exists, send OTP
+    if (existingUser) {
+      await sendEmailOTP({ email });
+      return parseStringify({ accountId: existingUser.accountId });
+    }
+
+    return parseStringify({ accountId: null, error: "User not found" });
+  } catch (error) {
+    handleError(error, "Failed to sign in user");
   }
 };

@@ -17,7 +17,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Simulate } from "react-dom/test-utils";
 import error = Simulate.error;
-import { createAccount } from "@/lib/actions/user.actions";
+import { createAccount, signInUser } from "@/lib/actions/user.actions";
 import OTPModal from "@/components/OTPModal";
 const formSchema = z.object({
   username: z.string().min(2).max(50),
@@ -50,15 +50,15 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
   // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+
     console.log(values);
     setIsLoading(true);
     try {
-      const user = await createAccount({
+      const user = type === "sign-up" ? await createAccount({
         fullName: values.fullName || "",
         email: values.email,
-      });
+      }) : await signInUser({ email: values.email })
+
       setAccountId(user.accountId);
     } catch {
       setErrorMessage("Failed to create account. Try Again !!!");
