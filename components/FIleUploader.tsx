@@ -9,7 +9,7 @@ import Image from "next/image";
 import Thumbnail from "@/components/Thumbnail";
 import { MAX_FILE_SIZE } from "@/constants";
 import { useToast } from "@/hooks/use-toast";
-import { uploadFile } from "@/lib/actions/files.action";
+import { uploadFile } from "@/lib/actions/file.actions";
 import { usePathname } from "next/navigation";
 
 interface Props {
@@ -67,7 +67,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
     fileName: string,
   ) => {
     e.stopPropagation();
-    setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName)); // remove only file that we click on
+    setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
   };
 
   return (
